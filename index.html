@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alcoa PDF Processor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 968px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        .upload-area p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .upload-area input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .file-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .file-item:hover {
+            background: #f0f2ff;
+            transform: translateX(5px);
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .file-meta {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9em;
+            border-radius: 20px;
+        }
+
+        .btn-download {
+            background: #10b981;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .message.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .stats {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📄 Alcoa PDF Processor</h1>
+            <p>Upload your packing list PDFs and convert them to CSV instantly</p>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <div class="content">
+            <!-- Upload Section -->
+            <div class="card">
+                <h2>📤 Upload PDF</h2>
+                <div id="uploadArea" class="upload-area">
+                    <div class="upload-icon">📁</div>
+                    <p><strong>Click to upload</strong> or drag and drop</p>
+                    <p style="font-size: 0.9em; color: #999;">PDF files only (Max 16MB)</p>
+                    <input type="file" id="fileInput" accept=".pdf">
+                </div>
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Processing your PDF...</p>
+                </div>
+            </div>
+
+            <!-- Processed Files Section -->
+            <div class="card">
+                <h2>📊 Processed Files</h2>
+                <div id="fileList" class="file-list">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>No processed files yet</p>
+                        <p style="font-size: 0.9em; margin-top: 10px;">Upload a PDF to get started</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const loading = document.getElementById('loading');
+        const message = document.getElementById('message');
+        const fileList = document.getElementById('fileList');
+
+        // Click to upload
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Handle file upload
+        async function handleFile(file) {
+            if (!file.name.toLowerCase().endsWith('.pdf')) {
+                showMessage('Please upload a PDF file only', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            loading.classList.add('show');
+            hideMessage();
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(`✅ ${data.message} (${data.rows_processed} rows)`, 'success');
+                    loadProcessedFiles();
+                } else {
+                    showMessage(`❌ ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showMessage(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                loading.classList.remove('show');
+                fileInput.value = '';
+            }
+        }
+
+        // Load processed files
+        async function loadProcessedFiles() {
+            try {
+                const response = await fetch('/processed-files');
+                const files = await response.json();
+
+                if (files.length === 0) {
+                    fileList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <p>No processed files yet</p>
+                            <p style="font-size: 0.9em; margin-top: 10px;">Upload a PDF to get started</p>
+                        </div>
+                    `;
+                } else {
+                    fileList.innerHTML = files.map(file => `
+                        <div class="file-item">
+                            <div class="file-info">
+                                <div class="file-name">${file.name}</div>
+                                <div class="file-meta">
+                                    ${formatFileSize(file.size)} • ${file.created}
+                                </div>
+                            </div>
+                            <div class="file-actions">
+                                <button class="btn btn-small btn-download" onclick="downloadFile('${file.name}')">
+                                    ⬇️ Download
+                                </button>
+                                <button class="btn btn-small btn-delete" onclick="deleteFile('${file.name}')">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading files:', error);
+            }
+        }
+
+        // Download file
+        function downloadFile(filename) {
+            window.location.href = `/download/${filename}`;
+        }
+
+        // Delete file
+        async function deleteFile(filename) {
+            if (!confirm(`Are you sure you want to delete ${filename}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/delete/${filename}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(`🗑️ ${data.message}`, 'success');
+                    loadProcessedFiles();
+                } else {
+                    showMessage(`❌ ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showMessage(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Show message
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = `message ${type} show`;
+            setTimeout(() => {
+                hideMessage();
+            }, 5000);
+        }
+
+        // Hide message
+        function hideMessage() {
+            message.classList.remove('show');
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+
+        // Load files on page load
+        loadProcessedFiles();
+
+        // Refresh files every 30 seconds
+        setInterval(loadProcessedFiles, 30000);
+    </script>
+</body>
+</html>
