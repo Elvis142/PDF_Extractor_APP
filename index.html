@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alcoa PDF Processor</title>
+    <title>PDF Processing - Alcoa Packing Lists</title>
     <style>
         * {
             margin: 0;
@@ -15,61 +15,37 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-
-        @media (max-width: 968px) {
-            .content {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .card {
             background: white;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
         }
 
-        .card h2 {
+        h1 {
             color: #333;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
         }
 
         .upload-area {
-            border: 3px dashed #667eea;
-            border-radius: 10px;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
             padding: 40px;
             text-align: center;
             cursor: pointer;
@@ -84,63 +60,51 @@
 
         .upload-area.dragover {
             border-color: #764ba2;
-            background: #e8ebff;
+            background: #e8ecff;
             transform: scale(1.02);
         }
 
         .upload-icon {
-            font-size: 4em;
+            font-size: 48px;
             margin-bottom: 15px;
         }
 
-        .upload-area p {
-            color: #666;
-            margin-bottom: 15px;
+        .upload-text {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 5px;
         }
 
-        .upload-area input[type="file"] {
+        .upload-subtext {
+            color: #999;
+            font-size: 13px;
+        }
+
+        #fileInput {
             display: none;
         }
 
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: transform 0.2s ease;
+        .files-section {
+            margin-top: 30px;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .file-list {
-            max-height: 500px;
-            overflow-y: auto;
+        .files-section h2 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
         }
 
         .file-item {
-            background: #f8f9ff;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.2s ease;
-        }
-
-        .file-item:hover {
-            background: #f0f2ff;
-            transform: translateX(5px);
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
         }
 
         .file-info {
@@ -148,14 +112,14 @@
         }
 
         .file-name {
-            font-weight: 600;
             color: #333;
+            font-weight: 500;
             margin-bottom: 5px;
         }
 
-        .file-meta {
-            font-size: 0.85em;
-            color: #666;
+        .file-status {
+            color: #999;
+            font-size: 13px;
         }
 
         .file-actions {
@@ -163,73 +127,74 @@
             gap: 10px;
         }
 
-        .btn-small {
-            padding: 8px 15px;
-            font-size: 0.9em;
-            border-radius: 20px;
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
 
         .btn-download {
-            background: #10b981;
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
 
         .btn-delete {
-            background: #ef4444;
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-delete:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .message {
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 6px;
             margin-bottom: 20px;
             display: none;
         }
 
         .message.success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #10b981;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
         }
 
         .message.error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #ef4444;
-        }
-
-        .message.show {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
             display: block;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .loading.show {
-            display: block;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+            margin-right: 10px;
         }
 
         @keyframes spin {
@@ -239,81 +204,59 @@
 
         .empty-state {
             text-align: center;
-            padding: 40px;
-            color: #666;
+            color: #999;
+            padding: 20px;
         }
 
-        .empty-state-icon {
-            font-size: 3em;
-            margin-bottom: 15px;
-            opacity: 0.5;
-        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
 
-        .stats {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
+            .file-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
 
-        .stat-badge {
-            background: #667eea;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.85em;
+            .file-actions {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            button {
+                flex: 1;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>📄 Alcoa PDF Processor</h1>
-            <p>Upload your packing list PDFs and convert them to CSV instantly</p>
-        </div>
+        <h1>📄 PDF Processor</h1>
+        <p class="subtitle">Upload and process Alcoa packing list PDFs</p>
 
         <div id="message" class="message"></div>
 
-        <div class="content">
-            <!-- Upload Section -->
-            <div class="card">
-                <h2>📤 Upload PDF</h2>
-                <div id="uploadArea" class="upload-area">
-                    <div class="upload-icon">📁</div>
-                    <p><strong>Click to upload</strong> or drag and drop</p>
-                    <p style="font-size: 0.9em; color: #999;">PDF files only (Max 16MB)</p>
-                    <input type="file" id="fileInput" accept=".pdf">
-                </div>
-                <div id="loading" class="loading">
-                    <div class="spinner"></div>
-                    <p>Processing your PDF...</p>
-                </div>
-            </div>
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">Drag and drop your PDF here</div>
+            <div class="upload-subtext">or click to browse</div>
+            <input type="file" id="fileInput" accept=".pdf" multiple>
+        </div>
 
-            <!-- Processed Files Section -->
-            <div class="card">
-                <h2>📊 Processed Files</h2>
-                <div id="fileList" class="file-list">
-                    <div class="empty-state">
-                        <div class="empty-state-icon">📭</div>
-                        <p>No processed files yet</p>
-                        <p style="font-size: 0.9em; margin-top: 10px;">Upload a PDF to get started</p>
-                    </div>
-                </div>
-            </div>
+        <div class="files-section">
+            <h2>Processed Files</h2>
+            <div id="filesList"></div>
         </div>
     </div>
 
     <script>
         const uploadArea = document.getElementById('uploadArea');
         const fileInput = document.getElementById('fileInput');
-        const loading = document.getElementById('loading');
-        const message = document.getElementById('message');
-        const fileList = document.getElementById('fileList');
+        const filesList = document.getElementById('filesList');
+        const messageDiv = document.getElementById('message');
 
-        // Click to upload
-        uploadArea.addEventListener('click', () => {
-            fileInput.click();
-        });
+        // Upload area click
+        uploadArea.addEventListener('click', () => fileInput.click());
 
         // Drag and drop
         uploadArea.addEventListener('dragover', (e) => {
@@ -328,148 +271,139 @@
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadArea.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
-            }
+            handleFiles(e.dataTransfer.files);
         });
 
         // File input change
         fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                handleFile(e.target.files[0]);
-            }
+            handleFiles(e.target.files);
         });
 
-        // Handle file upload
-        async function handleFile(file) {
-            if (!file.name.toLowerCase().endsWith('.pdf')) {
-                showMessage('Please upload a PDF file only', 'error');
-                return;
+        function handleFiles(files) {
+            for (let file of files) {
+                if (file.type !== 'application/pdf') {
+                    showMessage('Only PDF files are allowed', 'error');
+                    continue;
+                }
+                uploadFile(file);
             }
+        }
 
+        function uploadFile(file) {
             const formData = new FormData();
             formData.append('file', file);
 
-            loading.classList.add('show');
-            hideMessage();
+            const fileId = file.name.replace('.pdf', '').replace(/\s+/g, '_');
+            addFileToList(fileId, file.name, 'uploading');
 
-            try {
-                const response = await fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMessage(`✅ ${data.message} (${data.rows_processed} rows)`, 'success');
-                    loadProcessedFiles();
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateFileStatus(fileId, 'success');
+                    showMessage(`✓ ${file.name} processed successfully`, 'success');
                 } else {
-                    showMessage(`❌ ${data.error}`, 'error');
+                    updateFileStatus(fileId, 'error');
+                    showMessage(`✗ Failed to process ${file.name}: ${data.error}`, 'error');
                 }
-            } catch (error) {
-                showMessage(`❌ Error: ${error.message}`, 'error');
-            } finally {
-                loading.classList.remove('show');
-                fileInput.value = '';
-            }
+            })
+            .catch(error => {
+                updateFileStatus(fileId, 'error');
+                showMessage(`✗ Upload failed: ${error.message}`, 'error');
+            });
         }
 
-        // Load processed files
-        async function loadProcessedFiles() {
-            try {
-                const response = await fetch('/processed-files');
-                const files = await response.json();
+        function addFileToList(fileId, filename, status) {
+            let fileItem = document.getElementById(`file-${fileId}`);
+            
+            if (!fileItem) {
+                fileItem = document.createElement('div');
+                fileItem.id = `file-${fileId}`;
+                fileItem.className = 'file-item';
+                filesList.appendChild(fileItem);
+            }
 
-                if (files.length === 0) {
-                    fileList.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📭</div>
-                            <p>No processed files yet</p>
-                            <p style="font-size: 0.9em; margin-top: 10px;">Upload a PDF to get started</p>
+            fileItem.innerHTML = `
+                <div class="file-info">
+                    <div class="file-name">📄 ${filename}</div>
+                    <div class="file-status">${status === 'uploading' ? '<span class="loading"></span>Processing...' : status === 'success' ? '✓ Ready' : '✗ Failed'}</div>
+                </div>
+                <div class="file-actions">
+                    ${status === 'success' ? `
+                        <button class="btn-download" onclick="downloadFile('${fileId}')">Download CSV</button>
+                        <button class="btn-delete" onclick="deleteFile('${fileId}')">Delete</button>
+                    ` : `
+                        <button class="btn-delete" onclick="deleteFile('${fileId}')">Remove</button>
+                    `}
+                </div>
+            `;
+        }
+
+        function updateFileStatus(fileId, status) {
+            const fileItem = document.getElementById(`file-${fileId}`);
+            if (fileItem) {
+                if (status === 'success') {
+                    fileItem.innerHTML = `
+                        <div class="file-info">
+                            <div class="file-name">📄 ${fileItem.querySelector('.file-name').textContent.substring(2)}</div>
+                            <div class="file-status">✓ Ready</div>
+                        </div>
+                        <div class="file-actions">
+                            <button class="btn-download" onclick="downloadFile('${fileId}')">Download CSV</button>
+                            <button class="btn-delete" onclick="deleteFile('${fileId}')">Delete</button>
                         </div>
                     `;
-                } else {
-                    fileList.innerHTML = files.map(file => `
-                        <div class="file-item">
-                            <div class="file-info">
-                                <div class="file-name">${file.name}</div>
-                                <div class="file-meta">
-                                    ${formatFileSize(file.size)} • ${file.created}
-                                </div>
-                            </div>
-                            <div class="file-actions">
-                                <button class="btn btn-small btn-download" onclick="downloadFile('${file.name}')">
-                                    ⬇️ Download
-                                </button>
-                                <button class="btn btn-small btn-delete" onclick="deleteFile('${file.name}')">
-                                    🗑️ Delete
-                                </button>
-                            </div>
-                        </div>
-                    `).join('');
                 }
-            } catch (error) {
-                console.error('Error loading files:', error);
             }
         }
 
-        // Download file
-        function downloadFile(filename) {
-            window.location.href = `/download/${filename}`;
+        function downloadFile(fileId) {
+            window.location.href = `/download/${fileId}`;
         }
 
-        // Delete file
-        async function deleteFile(filename) {
-            if (!confirm(`Are you sure you want to delete ${filename}?`)) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/delete/${filename}`, {
-                    method: 'DELETE'
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMessage(`🗑️ ${data.message}`, 'success');
-                    loadProcessedFiles();
-                } else {
-                    showMessage(`❌ ${data.error}`, 'error');
-                }
-            } catch (error) {
-                showMessage(`❌ Error: ${error.message}`, 'error');
+        function deleteFile(fileId) {
+            if (confirm('Delete this file?')) {
+                fetch(`/delete/${fileId}`, { method: 'DELETE' })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById(`file-${fileId}`).remove();
+                        showMessage('✓ File deleted', 'success');
+                        if (filesList.children.length === 0) {
+                            filesList.innerHTML = '<div class="empty-state">No files processed yet</div>';
+                        }
+                    })
+                    .catch(error => showMessage(`✗ Delete failed: ${error.message}`, 'error'));
             }
         }
 
-        // Show message
         function showMessage(text, type) {
-            message.textContent = text;
-            message.className = `message ${type} show`;
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
             setTimeout(() => {
-                hideMessage();
-            }, 5000);
+                messageDiv.className = 'message';
+            }, 4000);
         }
 
-        // Hide message
-        function hideMessage() {
-            message.classList.remove('show');
-        }
-
-        // Format file size
-        function formatFileSize(bytes) {
-            if (bytes < 1024) return bytes + ' B';
-            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
-            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        // Load initial file list
+        function loadFileList() {
+            fetch('/list-files')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.files && data.files.length > 0) {
+                        data.files.forEach(file => {
+                            addFileToList(file.file_id, file.filename, 'success');
+                        });
+                    } else {
+                        filesList.innerHTML = '<div class="empty-state">No files processed yet</div>';
+                    }
+                });
         }
 
         // Load files on page load
-        loadProcessedFiles();
-
-        // Refresh files every 30 seconds
-        setInterval(loadProcessedFiles, 30000);
+        loadFileList();
     </script>
 </body>
 </html>
