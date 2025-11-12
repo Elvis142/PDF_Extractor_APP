@@ -5,8 +5,8 @@
 <div class="container">
   <div class="page-head">
     <span class="brand-pill">Alcoa</span>
-    <h1>PDF Processor</h1>
-    <p class="subtitle">Upload Alcoa packing list PDFs to extract structured data.</p>
+    <h1>Alcoa PDF Extractor</h1>
+    <p class="subtitle">Upload Alcoa packing list PDFs Here.</p>
   </div>
 
   <div id="message" class="message" aria-live="polite"></div>
@@ -19,17 +19,93 @@
   </div>
 
   <ul class="upload-notes">
-    <li>PDF only (max 20MB)</li>
     <li>Upload one or more files</li>
   </ul>
 
   <div class="files-section">
-    <h2>Processed Files</h2>
-    <div id="filesList"></div>
+    <div class="files-actions-top" style="display:flex;justify-content:flex-end;margin:8px 0 12px;">
+      <button class="btn-xs btn-remove" onclick="clearAll()">Clear All</button>
+    </div>
+    <div class="files-table" role="table" aria-label="Processed files">
+    <div class="files-head" role="row">
+    <div role="columnheader">File</div>
+    <div role="columnheader">Timestamp</div>
+    <div role="columnheader">Status</div>
+    <div role="columnheader" class="col-actions">Actions</div>
+  </div>
+  <div id="filesList" role="rowgroup"></div>
+</div>
   </div>
 </div>
 
 <script>
+
+function middleEllipsis(name, max=60){
+  if (name.length <= max) return name;
+  const head = Math.ceil(max*0.6);
+  const tail = max - head - 1;
+  return name.slice(0, head) + "…" + name.slice(-tail);
+}
+
+function tsFromFilename(name){
+  const m = name.match(/_(\d{8})_(\d{6})_/);
+  if (!m) return "—";
+  const [_, d, t] = m;
+  return `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)} ${t.slice(0,2)}:${t.slice(2,4)}:${t.slice(4,6)}`;
+}
+
+function addRowCompact(id, filename, ready=true){
+  const row = document.createElement('div');
+  row.className = 'file-row';
+  row.id = `file-${id}`;
+  row.innerHTML = `
+    <div class="file-name" title="${filename}">
+      <span class="icon">📄</span>
+      <span class="text">${middleEllipsis(filename, 72)}</span>
+    </div>
+    <div class="file-ts">${tsFromFilename(filename)}</div>
+    <div class="file-status">
+      <span class="status-pill ${ready ? 'status-ready' : 'status-failed'}">
+        ${ready ? '✓ READY' : '✗ FAILED'}
+      </span>
+    </div>
+    <div class="col-actions">
+      <div class="actions">
+        ${ready ? `<button class="btn-xs btn-download" onclick="location.href='/download/${id}'">Download CSV</button>` : ''}
+        <button class="btn-xs btn-remove" onclick="deleteFile('${id}')">Remove</button>
+      </div>
+    </div>`;
+  document.getElementById('filesList').appendChild(row);
+}
+
+function deleteFile(id){
+  if(!confirm('Delete this file?')) return;
+  fetch(`/api/delete/${id}`, { method: 'DELETE' })
+    .then(r => r.json())
+    .then(() => {
+      const el = document.getElementById(`file-${id}`);
+      if (el) el.remove();
+      show('✓ File deleted', 'success');
+    })
+    .catch(err => show('Delete failed: ' + err.message, 'error'));
+}
+
+function clearAll(){
+  if(!confirm('Delete ALL processed files?')) return;
+  fetch('/api/list-files')
+    .then(r => r.json())
+    .then(data => {
+      const ids = (data.files || []).map(f => f.file_id);
+      return Promise.all(ids.map(id => fetch(`/api/delete/${id}`, { method: 'DELETE' })));
+    })
+    .then(() => {
+      const list = document.getElementById('filesList');
+      if (list) list.innerHTML = '';
+      show('✓ All files cleared', 'success');
+    })
+    .catch(err => show('Clear all failed: ' + err.message, 'error'));
+}
+
 const uploadArea = document.getElementById('uploadArea');
 const fileInput  = document.getElementById('fileInput');
 const filesList  = document.getElementById('filesList');
@@ -45,35 +121,11 @@ function handleFiles(files){
   [...files].forEach(f=>{
     if (f.type !== 'application/pdf') return show('Only PDF files are allowed','error');
     const id = crypto.randomUUID().slice(0,12);
-    addRow(id, f.name);
+    addRowCompact(id, f.name, false);
     uploadWithProgress(f, id);
   });
 }
 
-function addRow(id, name){
-  const el = document.createElement('div');
-  el.id = `file-${id}`;
-  el.className = 'file-item';
-  el.innerHTML = `
-    <div class="file-info">
-      <div class="file-name">📄 ${name}</div>
-      <div class="file-status">Uploading…</div>
-      <div class="progress"><div class="bar"></div></div>
-      <small class="hint"></small>
-      <ul class="kv-preview" style="display:none">
-        <li><strong>Date:</strong> <span data-k="date"></span></li>
-        <li><strong>Lot:</strong> <span data-k="lot"></span></li>
-        <li><strong>Net Weight:</strong> <span data-k="net"></span></li>
-      </ul>
-    </div>
-    <div class="file-actions">
-      <button class="btn-download" style="display:none">Download CSV</button>
-      <button class="btn-delete">Remove</button>
-    </div>`;
-  el.querySelector('.btn-delete').onclick = ()=> el.remove();
-  el.querySelector('.btn-download').onclick = ()=> window.location.href = el.dataset.dl;
-  filesList.prepend(el);
-}
 
 function uploadWithProgress(file, rowId){
   const xhr = new XMLHttpRequest();
@@ -90,7 +142,7 @@ function uploadWithProgress(file, rowId){
     try{
       const res = JSON.parse(xhr.responseText || '{}');
       if (xhr.status===200 && res.success){
-        setBar(rowId, 100);
+        // no progress bar in compact layout
         markSuccess(rowId, res);
       }else{
         markError(rowId, res.error || 'Upload failed');
@@ -106,23 +158,27 @@ function setBar(id, pct){
   if (bar) bar.style.width = pct + '%';
 }
 function markSuccess(id, res){
-  const el = document.getElementById(`file-${id}`);
-  el.querySelector('.file-status').textContent = '✓ Ready';
-  el.querySelector('.btn-download').style.display = 'inline-flex';
-  el.dataset.dl = res.csv;
+  // remove any placeholder row that used the client-side temp id
+  const old = document.getElementById(`file-${id}`);
+  if (old) old.remove();
 
-  if (res.preview){
-    el.querySelector('.kv-preview').style.display = 'block';
-    el.querySelector('[data-k="date"]').textContent = res.preview.date || '—';
-    el.querySelector('[data-k="lot"]').textContent  = res.preview.lot  || '—';
-    el.querySelector('[data-k="net"]').textContent  = res.preview.net_weight || '—';
+  // prefer original uploaded filename; fallback to parsing from CSV url
+  let fname = res && (res.original_name || "");
+  if (!fname && res && res.csv) {
+    try { fname = res.csv.split("/").pop(); } catch {}
   }
+  if (!fname) fname = "output.csv";
+
+  // IMPORTANT: use the server's file_id so /download/<file_id> hits the right file
+  const serverId = (res && res.file_id) ? res.file_id : id;
+
+  addRowCompact(serverId, fname, true);
 }
 function markError(id, msg){
-  const el = document.getElementById(`file-${id}`);
-  el.classList.add('error');
-  el.querySelector('.file-status').textContent = '✗ Failed';
-  el.querySelector('.hint').textContent = msg || '';
+  const old = document.getElementById(`file-${id}`);
+  if (old) old.remove();
+  addRowCompact(id, (msg ? `Error: ${msg}` : "Upload failed"), false);
+  show(msg || "Upload failed", "error");
 }
 function show(text, type){
   messageDiv.textContent = text;
@@ -130,15 +186,12 @@ function show(text, type){
   setTimeout(()=> messageDiv.className='message', 3500);
 }
 
-fetch('/api/list-files').then(r=>r.json()).then(data=>{
-  if (!data.files?.length) return;
-  data.files.forEach(f=>{
-    const id = f.file_id;
-    addRow(id, f.filename);
-    setBar(id,100);
-    markSuccess(id,{csv:`/download/${id}`});
+fetch('/api/list-files')
+  .then(r => r.json())
+  .then(data => {
+    if (!data.files?.length) return;
+    data.files.forEach(f => addRowCompact(f.file_id, f.original_name || f.filename, true));
   });
-});
 </script>
 
 {% endblock %}

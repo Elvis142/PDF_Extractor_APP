@@ -61,3 +61,47 @@ button{padding:8px 12px;border:0;border-radius:6px;cursor:pointer;font-weight:60
 
 h1 { font-size: 36px; }
 p.small { font-size: 24px; font-family: "Lucida Calligraphy", "Lucida Handwriting", cursive; text-transform: none; font-weight: bolder;}
+
+/* table shell */
+.files-table { background:#fff; border-radius:12px; box-shadow:0 6px 24px rgba(0,0,0,.08); overflow:hidden; }
+.files-head, .file-row {
+  display:grid;
+  grid-template-columns: 1fr 160px 120px 190px;
+  gap: 12px;
+  align-items:center;
+  padding: 12px 16px;
+}
+.files-head { background:#f7f8fd; color:#334155; font-weight:700; border-bottom:1px solid #e5e7eb; }
+
+/* rows */
+.file-row { border-bottom:1px solid #eef2f7; }
+.file-row:last-child { border-bottom:0; }
+.file-name { display:flex; align-items:center; gap:10px; min-width:0; }
+.file-name .icon { font-size:18px; opacity:.7; }
+.file-name .text { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* status pill */
+.status-pill {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 10px; border-radius:999px; font-weight:600; font-size:12px;
+}
+.status-ready { background:#e8f7ee; color:#166534; }
+.status-failed { background:#fde2e2; color:#7f1d1d; }
+
+/* actions */
+.col-actions { text-align:right; }
+.actions { display:flex; justify-content:flex-end; gap:8px; }
+.btn-xs { padding:6px 10px; font-size:12px; border-radius:8px; border:0; cursor:pointer; }
+.btn-download { background:#16a34a; color:#fff; }
+.btn-download:hover { filter:brightness(.95); }
+.btn-remove { background:#ef4444; color:#fff; }
+.btn-remove:hover { filter:brightness(.95); }
+
+/* make it breathe on mobile */
+@media (max-width: 720px) {
+  .files-head, .file-row {
+    grid-template-columns: 1fr 100px 90px 140px;
+    gap: 8px;
+  }
+}
+

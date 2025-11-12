@@ -51,7 +51,7 @@ def process_alcoa_pdf(pdf_path):
         # Save CSV (same timestamped filename in current working directory)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         base_name = os.path.splitext(os.path.basename(pdf_path))[0]
-        output_filename = f"{base_name}_{timestamp}_packing_list.csv"
+        output_filename = f"{base_name}.csv"
 
         df.to_csv(output_filename, index=False)
         logging.info(f"✅ CSV saved: {output_filename}")
