@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Alcoa • PDF Processor{% endblock %}
+{% block content %}
+
+<div class="container">
+  <div class="page-head">
+    <span class="brand-pill">Alcoa</span>
+    <h1>PDF Processor</h1>
+    <p class="subtitle">Upload Alcoa packing list PDFs to extract structured data.</p>
+  </div>
+
+  <div id="message" class="message" aria-live="polite"></div>
+
+  <div class="upload-area" id="uploadArea" tabindex="0" role="button" aria-busy="false">
+    <div class="upload-icon">📁</div>
+    <div class="upload-text">Drag and drop your PDF here</div>
+    <div class="upload-subtext">or click to browse</div>
+    <input type="file" id="fileInput" accept=".pdf" multiple hidden>
+  </div>
+
+  <ul class="upload-notes">
+    <li>PDF only (max 20MB)</li>
+    <li>Upload one or more files</li>
+  </ul>
+
+  <div class="files-section">
+    <h2>Processed Files</h2>
+    <div id="filesList"></div>
+  </div>
+</div>
+
+<script>
+const uploadArea = document.getElementById('uploadArea');
+const fileInput  = document.getElementById('fileInput');
+const filesList  = document.getElementById('filesList');
+const messageDiv = document.getElementById('message');
+
+uploadArea.addEventListener('click', () => fileInput.click());
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+function handleFiles(files){
+  [...files].forEach(f=>{
+    if (f.type !== 'application/pdf') return show('Only PDF files are allowed','error');
+    const id = crypto.randomUUID().slice(0,12);
+    addRow(id, f.name);
+    uploadWithProgress(f, id);
+  });
+}
+
+function addRow(id, name){
+  const el = document.createElement('div');
+  el.id = `file-${id}`;
+  el.className = 'file-item';
+  el.innerHTML = `
+    <div class="file-info">
+      <div class="file-name">📄 ${name}</div>
+      <div class="file-status">Uploading…</div>
+      <div class="progress"><div class="bar"></div></div>
+      <small class="hint"></small>
+      <ul class="kv-preview" style="display:none">
+        <li><strong>Date:</strong> <span data-k="date"></span></li>
+        <li><strong>Lot:</strong> <span data-k="lot"></span></li>
+        <li><strong>Net Weight:</strong> <span data-k="net"></span></li>
+      </ul>
+    </div>
+    <div class="file-actions">
+      <button class="btn-download" style="display:none">Download CSV</button>
+      <button class="btn-delete">Remove</button>
+    </div>`;
+  el.querySelector('.btn-delete').onclick = ()=> el.remove();
+  el.querySelector('.btn-download').onclick = ()=> window.location.href = el.dataset.dl;
+  filesList.prepend(el);
+}
+
+function uploadWithProgress(file, rowId){
+  const xhr = new XMLHttpRequest();
+  const data = new FormData();
+  data.append('file', file);
+  xhr.open('POST', '/api/upload/alcoa');
+
+  xhr.upload.onprogress = e => {
+    if (!e.lengthComputable) return;
+    const pct = Math.round((e.loaded/e.total)*100);
+    setBar(rowId, pct);
+  };
+  xhr.onload = () => {
+    try{
+      const res = JSON.parse(xhr.responseText || '{}');
+      if (xhr.status===200 && res.success){
+        setBar(rowId, 100);
+        markSuccess(rowId, res);
+      }else{
+        markError(rowId, res.error || 'Upload failed');
+      }
+    }catch{ markError(rowId, 'Invalid server response'); }
+  };
+  xhr.onerror = () => markError(rowId, 'Network error');
+  xhr.send(data);
+}
+
+function setBar(id, pct){
+  const bar = document.querySelector(`#file-${id} .progress .bar`);
+  if (bar) bar.style.width = pct + '%';
+}
+function markSuccess(id, res){
+  const el = document.getElementById(`file-${id}`);
+  el.querySelector('.file-status').textContent = '✓ Ready';
+  el.querySelector('.btn-download').style.display = 'inline-flex';
+  el.dataset.dl = res.csv;
+
+  if (res.preview){
+    el.querySelector('.kv-preview').style.display = 'block';
+    el.querySelector('[data-k="date"]').textContent = res.preview.date || '—';
+    el.querySelector('[data-k="lot"]').textContent  = res.preview.lot  || '—';
+    el.querySelector('[data-k="net"]').textContent  = res.preview.net_weight || '—';
+  }
+}
+function markError(id, msg){
+  const el = document.getElementById(`file-${id}`);
+  el.classList.add('error');
+  el.querySelector('.file-status').textContent = '✗ Failed';
+  el.querySelector('.hint').textContent = msg || '';
+}
+function show(text, type){
+  messageDiv.textContent = text;
+  messageDiv.className = `message ${type}`;
+  setTimeout(()=> messageDiv.className='message', 3500);
+}
+
+fetch('/api/list-files').then(r=>r.json()).then(data=>{
+  if (!data.files?.length) return;
+  data.files.forEach(f=>{
+    const id = f.file_id;
+    addRow(id, f.filename);
+    setBar(id,100);
+    markSuccess(id,{csv:`/download/${id}`});
+  });
+});
+</script>
+
+{% endblock %}

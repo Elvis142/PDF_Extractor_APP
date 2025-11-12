@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Packing List Processor{% endblock %}</title>
+
+  <!-- load CSS/JS from /static -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script defer src="{{ url_for('static', filename='nav.js') }}"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="{{ url_for('home') }}">Packing List Processor</a>
+    <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+    <nav class="site-nav" aria-label="Primary">
+      <ul>
+        <li><a href="{{ url_for('alcoa_page') }}">Alcoa</a></li>
+        <li><a href="{{ url_for('alcoa_page') }}">Alouette</a></li>
+        <li><a href="{{ url_for('alcoa_page') }}">Arvida</a></li>
+        <li><a href="{{ url_for('alcoa_page') }}">Century</a></li>
+        <li><a href="{{ url_for('alcoa_page') }}">Kitimat</a></li>
+        <li><a href="{{ url_for('alcoa_page') }}">Rio Tinto</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="page">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

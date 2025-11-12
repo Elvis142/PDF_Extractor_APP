@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Alcoa • PDF Processor{% endblock %}
+{% block content %}
+
+<main class="page">
+    <section class="hero">
+      <h1>Welcome</h1>
+      <p class="small">Please use the navigation to select a PDF category and upload packing list for processing.</p>
+      <p><a class="btn-primary" href="home.html">Start Uploading</a></p>
+      <img src="{{ url_for('static', filename='xcel.svg') }}" alt="PDF to Excel conversion illustration" class="image">
+    </section>
+  </main>
+
+  
+
+{% endblock %}

@@ -1,0 +1,74 @@
+:root{
+  --bg:#0f172a; --fg:#e2e8f0; --muted:#94a3b8; --accent:#38bdf8; --surface:#111827;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+  background:linear-gradient(135deg,#667eea 0%,#0f0e28 100%);
+  min-height:100vh;
+}
+.page{max-width:1100px;margin:0 auto;padding:2rem 1rem}
+.hero{color:#fff;text-align:center;margin-top:2rem}
+.btn-primary{display:inline-block;background:#9cc9df;color:#001826;text-decoration:none;padding:.7rem 1rem;border-radius:.6rem;font-weight:600}
+
+/* NAVBAR */
+.site-header{position:sticky;top:0;z-index:1000;background:rgba(17,24,39,.85);backdrop-filter:blur(8px);
+  border-bottom:1px solid rgba(148,163,184,.2);display:flex;align-items:center;gap:.75rem;padding:.6rem .9rem}
+.brand{font-weight:700;letter-spacing:.2px;text-decoration:none;color:var(--fg)}
+.site-nav{margin-left:auto}
+.site-nav ul{list-style:none;display:flex;gap:.25rem;margin:0;padding:0}
+.site-nav a{display:inline-block;padding:.45rem .7rem;border-radius:.6rem;color:var(--fg);text-decoration:none;transition:transform .15s,background .15s}
+.site-nav a:hover{background:rgba(148,163,184,.18);transform:translateY(-1px)}
+.site-nav a[aria-current="page"]{color:var(--accent);background:rgba(56,189,248,.14);outline:1px solid rgba(56,189,248,.35)}
+.nav-toggle{display:none;margin-left:auto;background:transparent;border:0;padding:.35rem;cursor:pointer}
+.nav-toggle .bar{display:block;width:26px;height:3px;background:var(--fg);margin:5px 0;border-radius:999px}
+@media (max-width:800px){
+  .nav-toggle{display:inline-block}
+  .site-nav{position:absolute;left:.75rem;right:.75rem;top:56px;background:#111827;border:1px solid rgba(148,163,184,.2);
+    border-radius:10px;opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity .15s,transform .15s}
+  .site-nav.open{opacity:1;pointer-events:auto;transform:translateY(0)}
+  .site-nav ul{flex-direction:column;padding:.4rem}
+  .site-nav a{width:100%}
+}
+
+/* Card container used on upload/extracted */
+.container{background:#fff;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.2);max-width:800px;width:100%;padding:40px;margin:24px auto}
+.subtitle{color:#666;text-align:center;margin-bottom:30px;font-size:14px}
+
+/* Upload UI */
+.upload-area{border:2px dashed #667eea;border-radius:8px;padding:40px;text-align:center;cursor:pointer;transition:all .3s ease;background:#f8f9ff}
+.upload-area:hover{border-color:#764ba2;background:#f0f2ff}
+.upload-area.dragover{border-color:#764ba2;background:#e8ecff;transform:scale(1.02)}
+.upload-icon{font-size:48px;margin-bottom:15px}
+.upload-text{color:#333;font-size:16px;margin-bottom:5px}
+.upload-subtext{color:#999;font-size:13px}
+#fileInput{display:none}
+
+.files-section{margin-top:30px}
+.files-section h2{color:#333;font-size:18px;margin-bottom:15px;border-bottom:2px solid #667eea;padding-bottom:10px}
+.file-item{display:flex;justify-content:space-between;align-items:center;background:#f8f9ff;padding:15px;border-radius:6px;margin-bottom:10px;border-left:4px solid #667eea}
+.file-info{flex:1}
+.file-name{color:#333;font-weight:500;margin-bottom:5px}
+.file-status{color:#999;font-size:13px}
+.file-actions{display:flex;gap:10px}
+button{padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-size:13px;font-weight:500;transition:all .3s ease}
+.btn-download{background:#667eea;color:#fff}
+.btn-download:hover{background:#5568d3;transform:translateY(-2px);box-shadow:0 4px 12px rgba(102,126,234,.4)}
+.btn-delete{background:#ff6b6b;color:#fff}
+.btn-delete:hover{background:#ff5252;transform:translateY(-2px);box-shadow:0 4px 12px rgba(255,107,107,.4)}
+.message{padding:15px;border-radius:6px;margin-bottom:20px;display:none}
+.message.success{background:#d4edda;color:#155724;border:1px solid #c3e6cb;display:block}
+.message.error{background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;display:block}
+.loading{display:inline-block;width:20px;height:20px;border:3px solid #f3f3f3;border-top:3px solid #667eea;border-radius:50%;animation:spin 1s linear infinite;margin-right:10px}
+@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+.empty-state{text-align:center;color:#999;padding:20px}
+
+.hero-image {
+  display: block;
+  margin: 25px auto 0 auto;
+  width: 500px;
+  max-width: 60%;
+  height: auto;
+  border-radius: 10px;
+}

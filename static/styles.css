@@ -1,0 +1,63 @@
+:root{--bg:#0f172a;--fg:#e2e8f0;--accent:#38bdf8}
+*{box-sizing:border-box}
+html,body{margin:0;font-family:Trebuchet MS, sans-serif;background:linear-gradient(135deg,#173b2a 0%,#5ed8b9 100%);min-height:100vh;text-transform: uppercase}
+.page{max-width:1100px;margin:0 auto;padding:2rem 1rem}
+.hero{color:#fff;text-align:center;margin-top:2rem}
+.btn-primary{display:inline-block;background:hsla(189, 92%, 45%, 0.714);color:#001826;text-decoration:none;padding:.7rem 1rem;border-radius:.6rem;font-weight:600}
+.hero-image{display:block;margin:25px auto 0;width:160px;max-width:70%;height:auto;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+
+.site-header{position:sticky;top:0;z-index:1000;background:rgba(14, 22, 0, 0.85);backdrop-filter:blur(8px);border-bottom:1px solid rgba(148,163,184,.2);display:flex;align-items:center;gap:.75rem;padding:.6rem .9rem}
+.brand{font-weight:700;text-decoration:none;color:var(--fg)}
+.site-nav{margin-left:auto}
+.site-nav ul{list-style:none;display:flex;gap:.25rem;margin:0;padding:0}
+.site-nav a{display:inline-block;padding:.45rem .7rem;border-radius:.6rem;color:var(--fg);text-decoration:none}
+.site-nav a:hover{background:rgba(36, 171, 195, 0.18)}
+.nav-toggle{display:none}
+@media (max-width:800px){ .nav-toggle{display:inline-block} }
+
+.container{background:#fff;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.2);max-width:800px;width:100%;padding:32px;margin:24px auto}
+.page-head{text-align:center;margin-bottom:16px}
+.brand-pill{display:inline-block;background:#0ea5e9;color:#05202a;padding:.25rem .6rem;border-radius:999px;font-weight:700;margin-bottom:.35rem}
+.subtitle{color:#666;text-align:center;font-size:14px}
+
+.upload-area{border:2px dashed #667eea;border-radius:8px;padding:38px;text-align:center;cursor:pointer;background:#f8f9ff;transition:.2s}
+.upload-area:hover{border-color:#764ba2;background:#f0f2ff}
+.upload-area.dragover{border-color:#764ba2;background:#e8ecff;transform:scale(1.01)}
+.upload-icon{font-size:44px;margin-bottom:10px}
+.upload-text{color:#333;font-size:16px}
+.upload-subtext{color:#888;font-size:13px}
+
+.upload-notes{list-style:none;color:#6b7280;margin:12px 0 0;padding:0;text-align:center;font-size:.9rem}
+.upload-notes li{display:inline-block;margin:.1rem .5rem}
+
+.files-section{margin-top:28px}
+.files-section h2{color:#333;font-size:18px;margin-bottom:12px;border-bottom:2px solid #667eea;padding-bottom:8px}
+.file-item{display:flex;justify-content:space-between;align-items:flex-start;background:#f8f9ff;padding:14px;border-radius:8px;margin-bottom:10px;border-left:4px solid #667eea}
+.file-name{color:#111;font-weight:600}
+.file-status{color:#374151;margin-top:4px}
+.progress{height:6px;background:#eef2ff;border-radius:999px;overflow:hidden;margin-top:8px}
+.progress .bar{height:100%;background:#6366f1;width:0%}
+.file-item.error .progress .bar{background:#ef4444}
+.file-item .hint{color:#64748b;display:block;margin-top:6px}
+.kv-preview{list-style:none;margin:8px 0 0;padding:0;color:#111;font-size:.9rem}
+.kv-preview li{display:inline-block;margin-right:12px}
+
+button{padding:8px 12px;border:0;border-radius:6px;cursor:pointer;font-weight:600}
+.btn-download{background:#41890e;color:#fff}
+.btn-download:hover{background:#045627}
+.btn-delete{background:#ef4444;color:#fff}
+.btn-delete:hover{background:#dc2626}
+.empty-state{text-align:center;color:#999;padding:20px}
+.message{padding:12px;border-radius:8px;margin:10px 0;display:none}
+.message.success{display:block;background:#d4edda;color:#155724;border:1px solid #c3e6cb}
+.message.error{display:block;background:#fde2e2;color:#7f1d1d;border:1px solid #fecaca}
+
+.hero-image {
+  margin: 25px auto 0 auto;
+  width: 500px;
+  max-width: 60%;
+  height: auto;
+}
+
+h1 { font-size: 36px; }
+p.small { font-size: 24px; font-family: "Lucida Calligraphy", "Lucida Handwriting", cursive; text-transform: none; font-weight: bolder;}
