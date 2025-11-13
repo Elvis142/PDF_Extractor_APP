@@ -1,26 +1,26 @@
 :root{--bg:#0f172a;--fg:#e2e8f0;--accent:#38bdf8}
 *{box-sizing:border-box}
-html,body{margin:0;font-family:Trebuchet MS, sans-serif;background:linear-gradient(135deg,#09301e 0%,#14b28d 100%);min-height:100vh;text-transform: uppercase}
-.page{max-width:1100px;margin:0 auto;padding:2rem 1rem}
+html,body{height:100%; margin:0;font-family:Trebuchet MS, sans-serif;background:linear-gradient(135deg,#011d02 0%,#b3e3c8 100%);min-height:100vh;text-transform: uppercase}
+.page{max-width:1100px;margin:0 auto;padding:2rem 1rem; flex: 1 0 auto;}
 .hero{color:#fff;text-align:center;margin-top:2rem}
 .btn-primary{display:inline-block;background:hsla(165, 94%, 42%, 0.714);color:#001826;text-decoration:none;padding:.7rem 1rem;border-radius:.6rem;font-weight:600}
 .hero-image{display:block;margin:25px auto 0;width:160px;max-width:70%;height:auto;border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,.25)}
 
-.site-header{position:sticky;top:0;z-index:1000;background:rgba(14, 22, 0, 0.85);backdrop-filter:blur(8px);border-bottom:1px solid rgba(148,163,184,.2);display:flex;align-items:center;gap:.75rem;padding:.6rem .9rem}
-.brand{font-weight:700;text-decoration:none;color:var(--fg)}
+.site-header{position:sticky;top:0;z-index:1000;background:rgb(255, 255, 255);backdrop-filter:blur(8px);border-bottom:1px solid rgba(148,163,184,.2);display:flex;align-items:center;gap:.75rem;padding:.6rem .9rem}
+.brand{font-weight:700;text-decoration:none;color:#050505;}
 .site-nav{margin-left:auto}
 .site-nav ul{list-style:none;display:flex;gap:.25rem;margin:0;padding:0}
-.site-nav a{display:inline-block;padding:.45rem .7rem;border-radius:.6rem;color:var(--fg);text-decoration:none}
-.site-nav a:hover{background:rgba(36, 171, 195, 0.18)}
+.site-nav a{display:inline-block;padding:.45rem .7rem;border-radius:.6rem; color:#050505;text-decoration:none}
+.site-nav a:hover{background:rgba(113, 213, 143, 0.733)}
 .nav-toggle{display:none}
 @media (max-width:800px){ .nav-toggle{display:inline-block} }
 
-.container{background:#fff;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.2);max-width:800px;width:100%;padding:32px;margin:24px auto}
+.container{background:#fff;border-radius:30px;box-shadow:0 10px 40px rgba(0,0,0,.2);max-width:1000px;width:100%;padding:32px;margin:24px auto}
 .page-head{text-align:center;margin-bottom:16px}
-.brand-pill{display:inline-block;background:#0ea5e9;color:#05202a;padding:.25rem .6rem;border-radius:999px;font-weight:700;margin-bottom:.35rem}
+.brand-pill{display:inline-block;background:#00b16d;color:#05202a;padding:.25rem .6rem;border-radius:99px;font-weight:700;margin-bottom:.35rem}
 .subtitle{color:#666;text-align:center;font-size:14px}
 
-.upload-area{border:2px dashed #667eea;border-radius:8px;padding:38px;text-align:center;cursor:pointer;background:#f8f9ff;transition:.2s}
+.upload-area{border:2px dashed #0c753f;border-radius:8px;padding:38px;text-align:center;cursor:pointer;background:#f8f9ff;transition:.2s}
 .upload-area:hover{border-color:#764ba2;background:#f0f2ff}
 .upload-area.dragover{border-color:#764ba2;background:#e8ecff;transform:scale(1.01)}
 .upload-icon{font-size:44px;margin-bottom:10px}
@@ -54,13 +54,10 @@ button{padding:8px 12px;border:0;border-radius:6px;cursor:pointer;font-weight:60
 
 .image {
   margin: 25px auto 0 auto;
-  width: 900px;
+  width: 1200px;
   max-width: 60%;
   height: auto;
 }
-
-h1 { font-size: 36px; }
-p.small { font-size: 24px; font-family: "Lucida Calligraphy", "Lucida Handwriting", cursive; text-transform: none; font-weight: bolder;}
 
 /* table shell */
 .files-table { background:#fff; border-radius:12px; box-shadow:0 6px 24px rgba(0,0,0,.08); overflow:hidden; }
@@ -105,3 +102,52 @@ p.small { font-size: 24px; font-family: "Lucida Calligraphy", "Lucida Handwritin
   }
 }
 
+body {
+  display: flex;
+  flex-direction: column;
+}
+.site-footer {
+  flex-shrink: 0;
+  width: 100%;
+  background: rgb(16, 21, 14);     /* subtle overlay on your gradient */
+  border-top: 1px solid rgba(20, 19, 19, 0);
+  backdrop-filter: blur(4px);
+}
+.site-footer .footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: center;              /* center horizontally */
+  align-items: center;
+  gap: 10px;
+  color: #d9f2e4;                       /* softer than pure white */
+  font-family: "Trebuchet MS", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-size: 14px;
+  letter-spacing: .3px;
+  text-transform: uppercase;            /* matches your nav vibe */
+}
+.site-footer .dot {
+  opacity: .7;
+}
+
+/* Optional hover micro-interaction */
+.site-footer .footer-inner span {
+  transition: opacity .15s ease;
+}
+.site-footer:hover .footer-inner span {
+  opacity: .95;
+}
+
+/* Mobile tweak */
+@media (max-width: 480px) {
+  .site-footer .footer-inner {
+    font-size: 13px;
+    padding: 12px 16px;
+  }
+}
+
+.site-nav .navmenu a{
+  color: #050505;
+  font-weight: bolder;
+}
