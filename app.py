@@ -4,6 +4,12 @@ from pathlib import Path
 import uuid, os
 from processors.alcoa_processor import process_alcoa_pdf
 
+app = Flask(
+    __name__,
+    template_folder="Templates",   # match your folder names exactly
+    static_folder="Static"
+)
+
 BASE = Path(__file__).parent.resolve()
 UPLOAD_DIR = BASE / "uploads"
 OUT_DIR = BASE / "outputs"
@@ -12,7 +18,6 @@ OUT_DIR.mkdir(exist_ok=True)
 
 ALLOWED_EXTS = {".pdf"}
 
-app = Flask(__name__)
 
 # ---------- Pages ----------
 @app.get("/")
