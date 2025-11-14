@@ -6,8 +6,8 @@ from processors.alcoa_processor import process_alcoa_pdf
 
 app = Flask(
     __name__,
-    static_folder="Static",
-    template_folder="Templates"
+    static_folder="static",
+    template_folder="templates"
 )
 
 BASE = Path(__file__).parent.resolve()
