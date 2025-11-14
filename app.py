@@ -4,9 +4,7 @@ from pathlib import Path
 import uuid, os
 from processors.alcoa_processor import process_alcoa_pdf
 
-app = Flask(
-    __name__
-)
+app = Flask(__name__)
 
 BASE = Path(__file__).parent.resolve()
 UPLOAD_DIR = BASE / "uploads"
