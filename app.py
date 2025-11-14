@@ -4,7 +4,11 @@ from pathlib import Path
 import uuid, os
 from processors.alcoa_processor import process_alcoa_pdf
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder="Templates",
+    static_folder="static"   # lower-case now
+)
 
 BASE = Path(__file__).parent.resolve()
 UPLOAD_DIR = BASE / "uploads"
