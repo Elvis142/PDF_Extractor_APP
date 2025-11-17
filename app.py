@@ -3,6 +3,7 @@ from werkzeug.utils import secure_filename
 from pathlib import Path
 import uuid, os
 from processors.alcoa_processor import process_alcoa_pdf
+from processors.alouette_processor import process_alouette_pdf
 
 app = Flask(
     __name__,
@@ -72,6 +73,47 @@ def api_upload_alcoa():
     try:
         # ✅ Call your parser EXACTLY as implemented: 1 arg, returns CSV path/filename
         csv_generated = process_alcoa_pdf(str(pdf_path))
+        if not csv_generated:
+            return jsonify(success=False, error="No valid data extracted"), 422
+
+        # csv_generated may be a filename in the current working dir.
+        # Move it into OUT_DIR with a name that starts with file_id so /download/<id> works.
+        src = Path(csv_generated)
+        if not src.is_absolute():
+            src = Path.cwd() / src
+
+        OUT_DIR.mkdir(exist_ok=True)
+        dest = OUT_DIR / f"{file_id}_{src.name}"
+        os.replace(src, dest)  # atomic move/rename
+
+        return jsonify(
+            success=True,
+            file_id=file_id,
+            filename=dest.name,
+            csv=f"/download/{file_id}"   # your existing download route uses file_id
+        )
+
+    except Exception as e:
+        return jsonify(success=False, error=str(e)), 500
+    
+@app.post("/api/upload/alouette")
+def api_upload_alouette():
+    f = request.files.get("file")
+    if not f or not f.filename:
+        return jsonify(success=False, error="No file provided"), 400
+
+    ext = Path(f.filename).suffix.lower()
+    if ext not in ALLOWED_EXTS:
+        return jsonify(success=False, error="PDF files only"), 400
+
+    file_id = uuid.uuid4().hex[:12]
+    safe_name = secure_filename(f.filename)
+    pdf_path = UPLOAD_DIR / f"{file_id}_{safe_name}"
+    f.save(pdf_path)
+
+    try:
+        # ✅ Call your parser EXACTLY as implemented: 1 arg, returns CSV path/filename
+        csv_generated = process_alouette_pdf(str(pdf_path))
         if not csv_generated:
             return jsonify(success=False, error="No valid data extracted"), 422
 
