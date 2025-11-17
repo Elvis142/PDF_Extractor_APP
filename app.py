@@ -23,10 +23,30 @@ ALLOWED_EXTS = {".pdf"}
 @app.get("/")
 def home():
     return render_template("index.html")
-
+                                
 @app.get("/alcoa")
 def alcoa_page():
     return render_template("alcoa.html")
+
+@app.get("/alouette")
+def alouette_page():
+    return render_template("alouette.html")
+
+@app.get("/arvida")
+def arvida_page():
+    return render_template("arvida.html")
+
+@app.get("/century")
+def century_page():
+    return render_template("century.html")
+
+@app.get("/kitimat")
+def kitimat_page():
+    return render_template("kitimat.html")
+
+@app.get("/rio")
+def rio_page():
+    return render_template("rio.html")
 
 @app.get("/extracted")
 def extracted_page():
