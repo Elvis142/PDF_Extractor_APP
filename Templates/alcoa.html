@@ -116,10 +116,22 @@ uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag
 uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
 fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
+function uid(len=12) {
+    // Fallback if randomUUID doesn't exist
+    if (crypto.randomUUID) {
+        return crypto.randomUUID().replace(/-/g,"").slice(0, len);
+    }
+    // Manual fallback for older browsers
+    return [...crypto.getRandomValues(new Uint8Array(len))]
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("")
+        .slice(0, len);
+}
+
 function handleFiles(files){
   [...files].forEach(f=>{
     if (f.type !== 'application/pdf') return show('Only PDF files are allowed','error');
-    const id = crypto.randomUUID().slice(0,12);
+    const id = uid(12);
     addRowCompact(id, f.name, false);
     uploadWithProgress(f, id);
   });
