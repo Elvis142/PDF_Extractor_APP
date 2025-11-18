@@ -36,4 +36,172 @@
 </div>
   </div>
 </div>
+
+<script>
+
+function middleEllipsis(name, max=60){
+  if (name.length <= max) return name;
+  const head = Math.ceil(max*0.6);
+  const tail = max - head - 1;
+  return name.slice(0, head) + "…" + name.slice(-tail);
+}
+
+function tsFromFilename(name){
+  const m = name.match(/_(\d{8})_(\d{6})_/);
+  if (!m) return "—";
+  const [_, d, t] = m;
+  return `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)} ${t.slice(0,2)}:${t.slice(2,4)}:${t.slice(4,6)}`;
+}
+
+function addRowCompact(id, filename, ready=true){
+  const row = document.createElement('div');
+  row.className = 'file-row';
+  row.id = `file-${id}`;
+  row.innerHTML = `
+    <div class="file-name" title="${filename}">
+      <span class="icon">📄</span>
+      <span class="text">${middleEllipsis(filename, 72)}</span>
+    </div>
+    <div class="file-ts">${tsFromFilename(filename)}</div>
+    <div class="file-status">
+      <span class="status-pill ${ready ? 'status-ready' : 'status-failed'}">
+        ${ready ? '✓ READY' : '✗ FAILED'}
+      </span>
+    </div>
+    <div class="col-actions">
+      <div class="actions">
+        ${ready ? `<button class="btn-xs btn-download" onclick="location.href='/download/${id}'">Download CSV</button>` : ''}
+        <button class="btn-xs btn-remove" onclick="deleteFile('${id}')">Remove</button>
+      </div>
+    </div>`;
+  document.getElementById('filesList').appendChild(row);
+}
+
+function deleteFile(id){
+  if(!confirm('Delete this file?')) return;
+  fetch(`/api/delete/${id}`, { method: 'DELETE' })
+    .then(r => r.json())
+    .then(() => {
+      const el = document.getElementById(`file-${id}`);
+      if (el) el.remove();
+      show('✓ File deleted', 'success');
+    })
+    .catch(err => show('Delete failed: ' + err.message, 'error'));
+}
+
+function clearAll(){
+  if(!confirm('Delete ALL processed files?')) return;
+  fetch('/api/list-files')
+    .then(r => r.json())
+    .then(data => {
+      const ids = (data.files || []).map(f => f.file_id);
+      return Promise.all(ids.map(id => fetch(`/api/delete/${id}`, { method: 'DELETE' })));
+    })
+    .then(() => {
+      const list = document.getElementById('filesList');
+      if (list) list.innerHTML = '';
+      show('✓ All files cleared', 'success');
+    })
+    .catch(err => show('Clear all failed: ' + err.message, 'error'));
+}
+
+const uploadArea = document.getElementById('uploadArea');
+const fileInput  = document.getElementById('fileInput');
+const filesList  = document.getElementById('filesList');
+const messageDiv = document.getElementById('message');
+
+uploadArea.addEventListener('click', () => fileInput.click());
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+function uid(len=12) {
+    // Fallback if randomUUID doesn't exist
+    if (crypto.randomUUID) {
+        return crypto.randomUUID().replace(/-/g,"").slice(0, len);
+    }
+    // Manual fallback for older browsers
+    return [...crypto.getRandomValues(new Uint8Array(len))]
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("")
+        .slice(0, len);
+}
+
+function handleFiles(files){
+  [...files].forEach(f=>{
+    if (f.type !== 'application/pdf') return show('Only PDF files are allowed','error');
+    const id = uid(12);
+    addRowCompact(id, f.name, false);
+    uploadWithProgress(f, id);
+  });
+}
+
+
+function uploadWithProgress(file, rowId){
+  const xhr = new XMLHttpRequest();
+  const data = new FormData();
+  data.append('file', file);
+  xhr.open('POST', '/api/upload/rio');
+
+  xhr.upload.onprogress = e => {
+    if (!e.lengthComputable) return;
+    const pct = Math.round((e.loaded/e.total)*100);
+    setBar(rowId, pct);
+  };
+  xhr.onload = () => {
+    try{
+      const res = JSON.parse(xhr.responseText || '{}');
+      if (xhr.status===200 && res.success){
+        // no progress bar in compact layout
+        markSuccess(rowId, res);
+      }else{
+        markError(rowId, res.error || 'Upload failed');
+      }
+    }catch{ markError(rowId, 'Invalid server response'); }
+  };
+  xhr.onerror = () => markError(rowId, 'Network error');
+  xhr.send(data);
+}
+
+function setBar(id, pct){
+  const bar = document.querySelector(`#file-${id} .progress .bar`);
+  if (bar) bar.style.width = pct + '%';
+}
+function markSuccess(id, res){
+  // remove any placeholder row that used the client-side temp id
+  const old = document.getElementById(`file-${id}`);
+  if (old) old.remove();
+
+  // prefer original uploaded filename; fallback to parsing from CSV url
+  let fname = res && (res.original_name || "");
+  if (!fname && res && res.csv) {
+    try { fname = res.csv.split("/").pop(); } catch {}
+  }
+  if (!fname) fname = "output.csv";
+
+  // IMPORTANT: use the server's file_id so /download/<file_id> hits the right file
+  const serverId = (res && res.file_id) ? res.file_id : id;
+
+  addRowCompact(serverId, fname, true);
+}
+function markError(id, msg){
+  const old = document.getElementById(`file-${id}`);
+  if (old) old.remove();
+  addRowCompact(id, (msg ? `Error: ${msg}` : "Upload failed"), false);
+  show(msg || "Upload failed", "error");
+}
+function show(text, type){
+  messageDiv.textContent = text;
+  messageDiv.className = `message ${type}`;
+  setTimeout(()=> messageDiv.className='message', 3500);
+}
+
+fetch('/api/list-files')
+  .then(r => r.json())
+  .then(data => {
+    if (!data.files?.length) return;
+    data.files.forEach(f => addRowCompact(f.file_id, f.original_name || f.filename, true));
+  });
+</script>
 {% endblock %}
